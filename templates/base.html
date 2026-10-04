@@ -69,32 +69,30 @@
                         </li>
                     </ul>
                     <ul class="navbar-nav ms-auto p-1 align-items-center">
-        <li class="nav-item d-flex align-items-center">
+                    <li class="nav-item d-flex align-items-center">
 
-            <a href="/profile/{{ current_user.id }}"
-               class="text-decoration-none fw-semibold me-3"
-               /* ДОБАВИЛИ margin-top: 4px; — эта магия плавно опустит буквы neo чуть ниже */
-               style="color: #6f42c1; font-size: 40px; line-height: 1; margin-top: 4px;">
-                {{ current_user.name }}
-            </a>
+                        <a href="/profile/{{ current_user.id }}"
+                           class="text-decoration-none fw-semibold me-3"
+                           style="color: #6f42c1; font-size: 40px; line-height: 1; margin-top: 4px;">
+                            {{ current_user.name }}
+                        </a>
 
-            <a href="/logout"
-               class="btn"
-               style="background-color: #ff8787; color: white; padding: 10px 24px; font-size: 1.1rem; font-weight: 600; line-height: 1.2;">
-                Выйти
-            </a>
-
-        </li>
-    </ul>
+                        <a href="/logout"
+                           class="btn"
+                           style="background-color: #ff8787; color: white; padding: 10px 24px; font-size: 1.1rem; font-weight: 600; line-height: 1.2;">
+                            Выйти
+                        </a>
+                    </li>
+                    </ul>
 
                     {% else %}
                     <div class="d-flex gap-2 p-1 ms-auto">
                         <a href="/register" class="btn" style="background-color: #9775fa; color: white;">Регистрация</a>
-    <a href="/login" class="btn" style="background-color: #ffd43b; color: white;">Вход</a>
+                        <a href="/login" class="btn" style="background-color: #ffd43b; color: white;">Вход</a>
                     </div>
                     {% endif %}
+                    </div>
                 </div>
-            </div>
         </nav>
     </header>
     {% block content %}{% endblock %}
