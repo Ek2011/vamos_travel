@@ -39,7 +39,7 @@ def main():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", Icon = "static/icon/")
 
 # регистрация
 @app.route('/register', methods=['GET', 'POST'])
