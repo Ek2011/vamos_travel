@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from flask import Flask, render_template, redirect, request, abort
+from flask import Flask, render_template, redirect, request, abort, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from sqlalchemy import desc
 from werkzeug.utils import secure_filename
@@ -37,54 +37,71 @@ def main():
     db_session.global_init("db/trevel.db")
     app.run(host='0.0.0.0', port=port)
 
-@app.route("/")
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("index.html", Icon = "static/icon/")
+    # Создаем оба экземпляра форм для главной страницы
+    login_form = LoginForm()
+    register_form = RegisterForm()
 
-# регистрация
-@app.route('/register', methods=['GET', 'POST'])
-def reqister():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация', form=form,
-                                   message="Пароли не совпадают")
-        db_sess = db_session.create_session()
-        if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация', form=form,
-                                   message="Такой пользователь уже есть")
-        user = User(
-            name=form.name.data,
-            email=form.email.data,
-            about=form.about.data
-        )
-        if form.file.data:
-            file = form.file.data
-            filename = secure_filename(file.filename)
-            # Сохраняем физически в папку
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            # Записываем имя файла в базу данных пользователю
-            user.file = filename
-        user.set_password(form.password.data)
-        db_sess.add(user)
-        db_sess.commit()
-        login_user(user)
-        return redirect('/')
-    return render_template('register.html', title='Регистрация', form=form)
+    message = ""
+    show_modal = None
 
-# логин
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            return redirect("/")
-        return render_template('login.html', message="Неправильный логин или пароль", form=form)
-    return render_template('login.html', title='Вход', form=form)
+    # --- ОБРАБОТКА ВХОДА (LOGIN) ---
+    if 'submit_login' in request.form:
+        if login_form.validate_on_submit():
+            db_sess = db_session.create_session()
+            user = db_sess.query(User).filter(User.email == login_form.email.data).first()
+            if user and user.check_password(login_form.password.data):
+                login_user(user, remember=login_form.remember_me.data)
+                return redirect('/')
 
+            message = "Неправильный логин или пароль"
+            show_modal = "loginModal"
+        else:
+            show_modal = "loginModal"
+
+    # --- ОБРАБОТКА РЕГИСТРАЦИИ (REGISTER) ---
+    elif 'submit_register' in request.form:
+        if register_form.validate_on_submit():
+            if register_form.password.data != register_form.password_again.data:
+                message = "Пароли не совпадают"
+                show_modal = "registerModal"
+            else:
+                db_sess = db_session.create_session()
+                if db_sess.query(User).filter(User.email == register_form.email.data).first():
+                    message = "Такой пользователь уже есть"
+                    show_modal = "registerModal"
+                else:
+                    # Ваша оригинальная логика создания пользователя
+                    user = User(
+                        name=register_form.name.data,
+                        email=register_form.email.data,
+                        about=register_form.about.data
+                    )
+                    if register_form.file.data:
+                        file = register_form.file.data
+                        filename = secure_filename(file.filename)
+                        # Сохраняем физически в папку
+                        file.save(os.path.join(UPLOAD_FOLDER, filename))
+                        # Записываем имя файла в БД
+                        user.file = filename
+
+                    user.set_password(register_form.password.data)
+                    db_sess.add(user)
+                    db_sess.commit()
+                    login_user(user)
+                    return redirect('/')
+        else:
+            show_modal = "registerModal"
+
+    # Рендерим главную страницу и передаем туда обе формы и метки ошибок
+    return render_template('index.html',
+                           login_form=login_form,
+                           register_form=register_form,
+                           message=message,
+                           Icon='static/icon',
+                           show_modal=show_modal)
 
 if __name__ == '__main__':
     main()

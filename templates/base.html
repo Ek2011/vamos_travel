@@ -93,16 +93,148 @@
 
                             {% else %}
                             <div class="d-flex gap-2 p-0 align-items-center">
-                                <a href="/register" class="btn"
-                                   style="background-color: #9775fa; color: white;">Регистрация</a>
-                                <a href="/login" class="btn" style="background-color: #ffd43b; color: white;">Вход</a>
-                            </div>
+                                <button type="button" class="btn" style="background-color: #ffd43b; color: white;" data-bs-toggle="modal" data-bs-target="#registerModal">
+                                    Регистрация
+                                </button>
+                                <!-- Кнопка Вход — ведёт на #loginModal -->
+                                <button type="button" class="btn" style="background-color: #ffd43b; color: white;" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                    Вход
+                                </button>
                             {% endif %}
                         </div>
                     </div>
             </nav>
     </header>
     {% block content %} {% endblock %}
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="loginModalLabel">Авторизация</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <form action="/" method="post">
+                <div class="modal-body">
+                    {{ login_form.hidden_tag() }}
+                    <p>
+                        {{ login_form.email.label }}<br>
+                        {{ login_form.email(class="form-control", type="email") }}<br>
+                        {% for error in login_form.email.errors %}
+                            <div class="alert alert-danger" role="alert">{{ error }}</div>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ login_form.password.label }}<br>
+                        {{ login_form.password(class="form-control", type="password") }}<br>
+                        {% for error in login_form.password.errors %}
+                            <div class="alert alert-danger" role="alert">{{ error }}</div>
+                        {% endfor %}
+                    </p>
+                    <p>{{ login_form.remember_me() }} {{ login_form.remember_me.label }}</p>
+
+                    {% if message and show_modal == 'loginModal' %}
+                        <div class="alert alert-danger" role="alert">{{ message }}</div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="submit_login" class="btn btn-primary">Войти</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="registerModalLabel">Регистрация</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <form action="/" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        {{ register_form.hidden_tag() }}
+
+                        <p>
+                            {{ register_form.email.label }}<br>
+                            {{ register_form.email(class="form-control", type="email") }}<br>
+                            {% for error in register_form.email.errors %}
+                                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                            {% endfor %}
+                        </p>
+
+                        <p>
+                            {{ register_form.password.label }}<br>
+                            {{ register_form.password(class="form-control", type="password") }}<br>
+                            {% for error in register_form.password.errors %}
+                                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                            {% endfor %}
+                        </p>
+
+                        <p>
+                            {{ register_form.password_again.label }}<br>
+                            {{ register_form.password_again(class="form-control", type="password") }}<br>
+                            {% for error in register_form.password_again.errors %}
+                                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                            {% endfor %}
+                        </p>
+
+                        <p>
+                            {{ register_form.name.label }}<br>
+                            {{ register_form.name(class="form-control") }}<br>
+                            {% for error in register_form.name.errors %}
+                                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                            {% endfor %}
+                        </p>
+
+                        <p>
+                            {{ register_form.about.label }}<br>
+                            {{ register_form.about(class="form-control") }}<br>
+                            {% for error in register_form.about.errors %}
+                                <p class="alert alert-danger" role="alert">{{ error }}</p>
+                            {% endfor %}
+                        </p>
+                        <div class="mb-3">
+                        <label class="register_form-label d-block">Фото профиля</label> <!-- Заголовок над кнопкой -->
+                        <div class="input-group">
+                            {{ register_form.file(class="register_form-control d-none", id="File", accept="image/*") }}
+                            <label for="File" class="btn btn-outline-secondary p-2 rounded-2 shadow-sm">
+                                <i class="bi bi-camera-fill me-1"></i> Добавить фото
+                            </label>
+                            <span id="file-name" class="text-muted ms-3 align-self-center">
+                                {% if current_file %}
+                                    {{ current_file }}
+                                {% else %}
+                                    Файл не выбран
+                                {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if message and show_modal == 'registerModal' %}
+                            <div class="alert alert-danger" role="alert">{{ message }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="submit_register" class="btn btn-primary">Зарегистрироваться</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+      document.getElementById('File').onchange = function (){
+      if (this.files && this.files.length > 0){
+      const fileNameSpan = document.getElementById('file-name');
+      fileNameSpan.textContent = 'Вы выбрали: ' + this.files[0].name;
+      }};
+    </script>
+    <script>
+      {% if show_modal %}
+        // Если Flask передал имя окна, находим его и показываем пользователю
+        const myModal = new bootstrap.Modal(document.getElementById('{{ show_modal }}'));
+        myModal.show();
+      {% endif %}
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous">
