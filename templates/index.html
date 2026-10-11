@@ -2,37 +2,165 @@
 
 {% block content %}
 {% if current_user.is_authenticated %}
-    <div class="container-fluid px-md-5 mt-5">
-        <div class="card p-4 rounded-4 mb-5 border-2" style="background-color: #f8f9fa;">
-            <div class="d-flex align-items-center mb-4">
-                <h3 class="fw-bold mb-0 me-2 fs-4">Активные поездки</h3>
-                <span class="rounded-circle" style="background-color: #40c057; width: 20px; height: 20px;"> </span>
-            </div>
-            <div class="row">
-                <div class="col-sm-6 mb-3 mb-sm-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Особое обращение с заголовком</h5>
-                            <p class="card-text">С вспомогательным текстом ниже в качестве естественного перехода к
-                                дополнительному контенту.</p>
-                            <a href="#" class="btn btn-primary">Перейти куда-нибудь</a>
+<div class="container-fluid px-md-5 mt-5">
+    <div class="card p-4 rounded-4 mb-5 border-2" style="background-color: #f8f9fa;">
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="fw-bold mb-0 me-2 fs-4">Активные поездки</h3>
+        <span class="rounded-circle" style="background-color: #40c057; width: 20px; height: 20px;"></span>
+    </div>
+
+    <div id="tripsCarousel" class="carousel slide" data-bs-ride="false">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="row g-4">
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Поездка в Сочи</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Выходные в Туле</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-none d-md-block">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Тур на Алтай</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Особое обращение с заголовком</h5>
-                        <p class="card-text">С вспомогательным текстом ниже в качестве естественного перехода к
-                            дополнительному контенту.</p>
-                        <a href="#" class="btn btn-primary">Перейти куда-нибудь</a>
+            <div class="carousel-item">
+                <div class="row g-4">
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Поездка в Казань</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#tripsCarousel" data-bs-slide="prev" style="width: 5%; filter: invert(1);">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Предыдущий</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#tripsCarousel" data-bs-slide="next" style="width: 5%; filter: invert(1);">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Следующий</span>
+        </button>
     </div>
+
+
+</div>
+    <div class="card p-4 rounded-4 mb-5 border-2" style="background-color: #f8f9fa;">
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="fw-bold mb-0 me-2 fs-4">История</h3>
+        <span class="rounded-circle" style="background-color: #ffd43b; width: 20px; height: 20px;"></span>
+    </div>
+
+    <div id="tripsCarousel2" class="carousel slide" data-bs-ride="false">
+        <div class="carousel-inner">
+
+            <div class="carousel-item active">
+                <div class="row g-4">
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Поездка в Сочи</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Просмотр</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Выходные в Туле</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Просмотр</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-none d-md-block">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Тур на Алтай</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Просмотр</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item">
+                <div class="row g-4">
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold fs-5">Поездка в Казань</h5>
+                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                </div>
+                                <a href="#" class="btn btn-primary mt-3 w-100">Просмотр</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#tripsCarousel2" data-bs-slide="prev" style="width: 5%; filter: invert(1);">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Просмотр</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#tripsCarousel2" data-bs-slide="next" style="width: 5%; filter: invert(1);">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Следующий</span>
+        </button>
+    </div>
+
+</div>
+
+</div>
+</div>
 {% else %}
-    Тут описание
+Планируйте маршруты, управляйте активными поездками и открывайте новые города.
+Всё — от спонтанных выходных до сложных экспедиций — в едином и эстетичном интерфейсе.
+Авторизуйтесь, чтобы начать путешествие.
+
 {% endif %}
 {% endblock %}
