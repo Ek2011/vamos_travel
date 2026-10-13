@@ -222,17 +222,30 @@
         </div>
     </div>
     <script>
-      document.getElementById('File').onchange = function (){
-      if (this.files && this.files.length > 0){
-      const fileNameSpan = document.getElementById('file-name');
-      fileNameSpan.textContent = 'Вы выбрали: ' + this.files[0].name;
-      }};
-    </script>
-    <script>
+      const fileInput = document.getElementById('File');
+      if (fileInput) {
+        fileInput.onchange = function () {
+          if (this.files && this.files.length > 0) {
+            // Проверяем оба возможных ID (старый и новый для модалки)
+            const fileNameSpan = document.getElementById('file-name') || document.getElementById('file-name-modal');
+            if (fileNameSpan) {
+              // Обязательно добавляем, чтобы взять первый файл из списка
+              fileNameSpan.textContent = 'Вы выбрали: ' + this.files[0].name;
+            }
+          }
+        };
+      }
+
+      // Скрипт автооткрытия окна при ошибках бэкенда
       {% if show_modal %}
-        // Если Flask передал имя окна, находим его и показываем пользователю
-        const myModal = new bootstrap.Modal(document.getElementById('{{ show_modal }}'));
-        myModal.show();
+        // Оборачиваем в setTimeout, чтобы Bootstrap гарантированно успел загрузиться в браузере
+        setTimeout(function() {
+          const modalElement = document.getElementById('{{ show_modal }}');
+          if (modalElement) {
+            const myModal = new bootstrap.Modal(modalElement);
+            myModal.show();
+          }
+        }, 100);
       {% endif %}
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

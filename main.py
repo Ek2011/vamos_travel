@@ -64,27 +64,28 @@ def index():
     # --- ОБРАБОТКА РЕГИСТРАЦИИ (REGISTER) ---
     elif 'submit_register' in request.form:
         if register_form.validate_on_submit():
+            # Проверка совпадения паролей
             if register_form.password.data != register_form.password_again.data:
                 message = "Пароли не совпадают"
                 show_modal = "registerModal"
             else:
                 db_sess = db_session.create_session()
+                # Проверка уникальности Email
                 if db_sess.query(User).filter(User.email == register_form.email.data).first():
                     message = "Такой пользователь уже есть"
                     show_modal = "registerModal"
                 else:
-                    # Ваша оригинальная логика создания пользователя
+                    # Создание пользователя
                     user = User(
                         name=register_form.name.data,
                         email=register_form.email.data,
                         about=register_form.about.data
                     )
+                    # Обработка аватара
                     if register_form.file.data:
                         file = register_form.file.data
                         filename = secure_filename(file.filename)
-                        # Сохраняем физически в папку
                         file.save(os.path.join(UPLOAD_FOLDER, filename))
-                        # Записываем имя файла в БД
                         user.file = filename
 
                     user.set_password(register_form.password.data)
