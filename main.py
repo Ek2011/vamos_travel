@@ -104,5 +104,11 @@ def index():
                            Icon='static/icon',
                            show_modal=show_modal)
 
+
+@app.route('/step_1', methods=['GET', 'POST'])
+@login_required
+def step_1():
+    return render_template('step_1.html')
+
 if __name__ == '__main__':
     main()

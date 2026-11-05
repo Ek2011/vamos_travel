@@ -70,7 +70,7 @@
                             {% if current_user.is_authenticated %}
                             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                                 <li class="nav-item d-flex align-items-center mx-3">
-                                    <a href="/" class="btn btn-custom-add" data-bs-toggle="modal" data-bs-target="#routeModal">
+                                    <a href="/step_1" class="btn btn-custom-add">
                                         <i class="bi bi-plus-circle"></i> Создать поездку
                                     </a>
                                 </li>
@@ -220,99 +220,6 @@
                 </form>
             </div>
         </div>
-    </div>
-    <div class="modal fade" id="routeModal" tabindex="-1" aria-labelledby="routeModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered"> <!-- modal-lg делает окно шире, centered центрирует по вертикали -->
-        <div class="modal-content">
-
-          <!-- Шапка окна -->
-          <div class="modal-header">
-            <h5 class="modal-title" id="routeModalLabel">Редактирование маршрута</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-          </div>
-
-          <!-- Тело окна (сюда перенесен весь ваш код) -->
-          <div class="modal-body p-4">
-
-            <!-- Поле ввода названия -->
-            <div class="input-group mb-4">
-              <span class="input-group-text" id="inputGroup-sizing-default">Название маршрута</span>
-              <input type="text" class="form-control" aria-label="Пример размера поля ввода" aria-describedby="inputGroup-sizing-default">
-            </div>
-
-            <!-- Управление точками -->
-            <div class="d-flex align-items-center mb-3">
-              <p class="mb-0 fs-4 fw-medium">Точки маршрута</p>
-              <button type="button" class="btn btn-warning ms-3" data-bs-toggle="modal" data-bs-target="#addPointModal">Добавить точку</button>
-            </div>
-
-            <!-- Список точек маршрута -->
-            <div class="d-flex align-items-center mt-3 p-2 bg-light rounded border">
-              <span class="badge bg-info text-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px;">
-                1
-              </span>
-              <p class="mb-0 fs-5 me-auto">Точка, дата</p> <!-- me-auto автоматически прижмет кнопки к правому краю -->
-
-              <!-- Блок с кнопками -->
-              <div class="d-flex gap-1">
-                <button type="button" class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5" style="width: 32px; height: 32px;">▲</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5" style="width: 32px; height: 32px;">▼</button>
-                <button type="button" class="btn btn-outline-danger btn-sm p-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Удалить">
-                  <svg xmlns="http://w3.org" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Подвал окна с кнопками действий -->
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button type="button" class="btn btn-primary">Сохранить изменения</button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-    <div class="modal fade" id="addPointModal" tabindex="-1" aria-labelledby="addPointModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered"> <!-- Окно по умолчанию идет стандартного размера, центрированное -->
-        <div class="modal-content shadow-lg"> <!-- shadow-lg добавит красивую тень поверх первого окна -->
-
-          <div class="modal-header bg-warning-subtle"> <!-- легкий оттенок для шапки, чтобы отличалось -->
-            <h5 class="modal-title" id="addPointModalLabel">Новая точка маршрута</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-          </div>
-
-          <div class="modal-body p-4">
-            <!-- Поле: Название локации -->
-            <div class="mb-3">
-              <label for="pointName" class="form-label">Название точки / Город</label>
-              <input type="text" class="form-control" id="pointName" placeholder="Например: Москва, Красная площадь">
-            </div>
-
-            <!-- Поле: Дата посещения -->
-            <div class="mb-3">
-              <label for="pointDate" class="form-label">Дата посещения</label>
-              <input type="date" class="form-control" id="pointDate">
-            </div>
-
-            <!-- Поле: Комментарий (опционально) -->
-            <div class="mb-3">
-              <label for="pointNotes" class="form-label">Заметки к точке</label>
-              <textarea class="form-control" id="pointNotes" rows="2" placeholder="Что планируется посмотреть..."></textarea>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <!-- При нажатии на отмену вернемся к первому окну -->
-            <button type="button" class="btn btn-secondary" data-bs-target="#routeModal" data-bs-toggle="modal">Отмена</button>
-            <button type="button" class="btn btn-warning">Добавить в маршрут</button>
-          </div>
-
-        </div>
-      </div>
     </div>
 
     <script>
