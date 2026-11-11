@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import uuid
 
 from flask import Flask, render_template, redirect, request, abort, url_for
@@ -17,6 +18,10 @@ login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 UPLOAD_FOLDER = "static/uploads/"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Подключаемся строго к папке db рядом с main.py
+db_session.global_init(os.path.join(BASE_DIR, "db", "trevel.db"))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -109,6 +114,31 @@ def index():
 @login_required
 def step_1():
     return render_template('step_1.html')
+
+from flask import request, redirect, url_for
+from data import db_session
+from data.points import TripPoint
+
+
+@app.route('/add_point', methods=['POST'])
+def add_point():
+    # Получаем данные из полей HTML-формы
+    destination = request.form.get('point_name')
+    arrival_time = request.form.get('point_date')
+
+    # Открываем сессию и создаем запись
+    db_sess = db_session.create_session()
+    point = TripPoint(
+        destination=destination,
+        arrival_time=arrival_time,
+    )
+    db_sess.add(point)
+    db_sess.commit()
+    print("ФАЙЛ БАЗЫ:", db_sess.bind.url)
+    print("ЗАПИСИ В ТАБЛИЦЕ:", db_sess.query(TripPoint).all())
+
+    return redirect(url_for('step_1'))  # Возвращаем на страницу конструктора
+
 
 if __name__ == '__main__':
     main()
