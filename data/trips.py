@@ -8,7 +8,7 @@ class Trip(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     user = orm.relationship('User')
     points = orm.relationship("TripPoint", back_populates='trip', cascade="all, delete-orphan")

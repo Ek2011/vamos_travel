@@ -1,3 +1,4 @@
+import json
 import os
 import sqlite3
 import uuid
@@ -9,7 +10,7 @@ from werkzeug.utils import secure_filename
 from forms.user import RegisterForm, LoginForm
 from data.users import User
 
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from data import db_session
 from data.trips import Trip
@@ -114,7 +115,41 @@ def index():
 @app.route('/step_1', methods=['GET', 'POST'])
 @login_required
 def step_1():
-    return render_template('step_1.html', points=points)
+    form = StepFirstForm()
+
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+
+        # 1. Создаем новую поездку для текущего пользователя
+        new_trip = Trip(
+            user_id=current_user.id,
+            title=form.title.data
+        )
+        db_sess.add(new_trip)
+        db_sess.flush()  # Получаем id новой поездки до финального сохранения
+
+        # 2. Достаем список городов, который собрал JavaScript на сайте
+        raw_points = form.points_data.data
+        if raw_points:
+            points_list = json.loads(raw_points)
+            for index, item in enumerate(points_list):
+                point = TripPoint(
+                    trip_id=new_trip.id,
+                    sequence_order=index + 1,
+                    destination=item['destination'],
+                    arrival_time=item['arrival_time']
+                )
+                db_sess.add(point)
+
+        db_sess.commit()
+
+        # 3. Проверяем, какая кнопка была нажата
+        if form.next_step.data:
+            return redirect(url_for('index'))
+        elif form.exit_step.data:
+            return redirect(url_for('index'))
+
+    return render_template('step_1.html', form=form)
 
 
 if __name__ == '__main__':

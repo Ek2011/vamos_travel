@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,19 +10,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
-<header>
+
+<!-- Главная форма StepOneForm -->
+<form id="stepOneForm" action="" method="POST">
+    {{ form.hidden_tag() }}
+
     <div class="container-lg p-4">
         <!-- Шапка -->
         <div class="d-flex align-items-center justify-content-between mb-4">
             <h5 class="mb-0">Создание маршрута</h5>
-            <a href="/" class="btn-close" aria-label="Закрыть"></a>
+            <!-- Крестик открывает модальное окно выхода -->
+            <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#exitModal" aria-label="Выйти"></button>
         </div>
 
-        <!-- Поле ввода названия -->
+        <!-- Поле ввода названия маршрута -->
         <div class="input-group mb-4">
             <span class="input-group-text" id="inputGroup-sizing-default">Название маршрута</span>
-            <input type="text" class="form-control" aria-label="Пример размера поля ввода"
-                   aria-describedby="inputGroup-sizing-default">
+            {{ form.title(class="form-control", placeholder="Например: Отпуск на море", required=True) }}
         </div>
 
         <!-- Управление точками -->
@@ -33,122 +37,157 @@
             </button>
         </div>
 
-        <!-- Список точек маршрута -->
-        {% if points %}
-        {% for point in points %}
-        <div class="d-flex align-items-center mt-2 p-2 bg-light rounded border">
-            <!-- Номер точки в синем кружочке (1, 2, 3...) -->
-            <span class="badge bg-info text-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3"
-                  style="width: 30px; height: 30px;">
-        {{ loop.index }}
-      </span>
+        <!-- Контейнер, куда JavaScript будет рисовать добавленные точки -->
+        <div id="pointsContainer">
+            <p id="emptyMessage" class="text-muted mt-3">В маршруте пока нет ни одной точки. Нажмите «Добавить точку».</p>
+        </div>
 
-            <!-- Название города и дата из базы данных -->
-            <p class="mb-0 fs-5 me-auto">
-                {{ point.destination }}, <span class="text-muted fs-6">{{ point.arrival_time }}</span>
-            </p>
+        <!-- Нижние кнопки действий -->
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exitModal">Выйти</button>
+            {{ form.next_step(class="btn btn-primary") }}
+        </div>
+    </div>
 
-            <!-- Блок с кнопками управления -->
-            <div class="d-flex gap-1">
-                <button type="button"
-                        class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
-                        style="width: 32px; height: 32px;" title="Вверх">▲
-                </button>
-                <button type="button"
-                        class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
-                        style="width: 32px; height: 32px;" title="Вниз">▼
-                </button>
-                <button type="button"
-                        class="btn btn-outline-danger btn-sm p-0 d-flex align-items-center justify-content-center"
-                        style="width: 32px; height: 32px;" title="Удалить">
-                    <svg xmlns="http://w3.org" width="20" height="20" fill="currentColor" class="bi bi-x-lg"
-                         viewBox="0 0 16 16">
-                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                    </svg>
-                </button>
+    <!-- Модальное окно при выходе (внутри формы, чтобы работала кнопка «Сохранить») -->
+    <div class="modal fade" id="exitModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title">Выход из создания маршрута</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Хотите сохранить черновик маршрута перед выходом?</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="/" class="btn btn-outline-danger">Не сохранять</a>
+                    {{ form.exit_step(class="btn btn-success") }}
+                </div>
             </div>
         </div>
-        {% endfor %}
-        {% else %}
-        <!-- Сообщение, если точек в базе еще нет -->
-        <p class="text-muted mt-3">В маршруте пока нет ни одной точки. Нажмите «Добавить точку».</p>
-        {% endif %}
-
-        <!-- Блок с кнопками -->
-        <div class="d-flex gap-1">
-            <button type="button"
-                    class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
-                    style="width: 32px; height: 32px;">▲
-            </button>
-            <button type="button"
-                    class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
-                    style="width: 32px; height: 32px;">▼
-            </button>
-            <button type="button"
-                    class="btn btn-outline-danger btn-sm p-0 d-flex align-items-center justify-content-center"
-                    style="width: 32px; height: 32px;" title="Удалить">
-                <i class="bi bi-x-lg fs-5" style="-webkit-text-stroke: 1.5px currentColor;"></i>
-            </button>
-        </div>
     </div>
+</form>
 
-    <!-- Кнопки действий -->
-    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-        <button type="button" class="btn btn-secondary">Отмена</button>
-        <button type="button" class="btn btn-primary">Сохранить изменения</button>
-    </div>
-
-    </div>
-</header>
-</div>
+<!-- Модальное окно добавления точки (работает через JS без перезагрузки) -->
 <div class="modal fade" id="addPointModal" tabindex="-1" aria-labelledby="addPointModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <!-- Окно по умолчанию идет стандартного размера, центрированное -->
-        <div class="modal-content shadow-lg"> <!-- shadow-lg добавит красивую тень поверх первого окна -->
-
-            <div class="modal-header bg-warning-subtle"> <!-- легкий оттенок для шапки, чтобы отличалось -->
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-warning-subtle">
                 <h5 class="modal-title" id="addPointModalLabel">Новая точка маршрута</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <form id="addPointForm" action="/add_point" method="POST">
+
+            <form id="addPointLocalForm">
                 <div class="modal-body p-4">
-                    <!-- Поле: Название локации -->
                     <div class="mb-3">
                         <label for="pointName" class="form-label">Название точки / Город</label>
                         <input type="text" class="form-control" id="pointName"
-                               name="point_name" placeholder="Например: Москва, Красная площадь" required>
+                               placeholder="Например: Москва, Красная площадь" required>
                     </div>
-
-                    <!-- Поле: Дата посещения -->
                     <div class="mb-3">
                         <label for="pointDate" class="form-label">Дата посещения</label>
-                        <input type="date" class="form-control" id="pointDate" name="point_date" required>
+                        <input type="date" class="form-control" id="pointDate" required>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <!-- При нажатии на отмену вернемся к первому окну -->
-                    <button type="button" class="btn btn-secondary" data-bs-target="#routeModal" data-bs-toggle="modal">
-                        Отмена
-                    </button>
-                    <button type="submit" form="addPointForm" class="btn btn-warning">Добавить в маршрут</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-warning">Добавить в маршрут</button>
                 </div>
-
+            </form>
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous">
-</script>
+        crossorigin="anonymous"></script>
+
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('open_modal') === '1') {
-    const routeModal = new bootstrap.Modal(document.getElementById('routeModal'));
-    routeModal.show();
-    // Очищаем адресную строку, чтобы при обычном обновлении F5 окно не выскакивало снова
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
+    // Список всех точек в памяти браузера
+    let points = [];
+
+    const pointsContainer = document.getElementById('pointsContainer');
+    const hiddenInput = document.getElementById('points_data');
+    const addPointLocalForm = document.getElementById('addPointLocalForm');
+    const addPointModalEl = document.getElementById('addPointModal');
+
+    // Функция перерисовки списка на экране и обновления скрытого поля
+    function renderPoints() {
+        // Упаковываем актуальный список в JSON для отправки в Python
+        hiddenInput.value = JSON.stringify(points);
+
+        if (points.length === 0) {
+            pointsContainer.innerHTML = '<p id="emptyMessage" class="text-muted mt-3">В маршруте пока нет ни одной точки. Нажмите «Добавить точку».</p>';
+            return;
+        }
+
+        pointsContainer.innerHTML = '';
+        points.forEach((point, index) => {
+            const card = document.createElement('div');
+            card.className = 'd-flex align-items-center mt-2 p-2 bg-light rounded border';
+            card.innerHTML = `
+                <span class="badge bg-info text-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                      style="width: 30px; height: 30px;">
+                    ${index + 1}
+                </span>
+                <p class="mb-0 fs-5 me-auto">
+                    ${point.destination}, <span class="text-muted fs-6">${point.arrival_time}</span>
+                </p>
+                <div class="d-flex gap-1">
+                    <button type="button" onclick="movePoint(${index}, -1)"
+                            class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
+                            style="width: 32px; height: 32px;" title="Вверх" ${index === 0 ? 'disabled' : ''}>▲</button>
+                    <button type="button" onclick="movePoint(${index}, 1)"
+                            class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
+                            style="width: 32px; height: 32px;" title="Вниз" ${index === points.length - 1 ? 'disabled' : ''}>▼</button>
+                    <button type="button" onclick="deletePoint(${index})"
+                            class="btn btn-outline-danger btn-sm p-0 d-flex align-items-center justify-content-center"
+                            style="width: 32px; height: 32px;" title="Удалить">
+                        <i class="bi bi-x-lg fs-6"></i>
+                    </button>
+                </div>
+            `;
+            pointsContainer.appendChild(card);
+        });
+    }
+
+    // Добавление новой точки из модального окна
+    addPointLocalForm.addEventListener('submit', function (e) {
+        e.preventDefault(); // Отменяем перезагрузку страницы
+
+        const nameInput = document.getElementById('pointName');
+        const dateInput = document.getElementById('pointDate');
+
+        points.push({
+            destination: nameInput.value.trim(),
+            arrival_time: dateInput.value
+        });
+
+        renderPoints();
+
+        // Очищаем поля и закрываем модальное окно
+        addPointLocalForm.reset();
+        const modalInstance = bootstrap.Modal.getInstance(addPointModalEl);
+        modalInstance.hide();
+    });
+
+    // Перемещение точки вверх (-1) или вниз (+1)
+    function movePoint(index, direction) {
+        const newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= points.length) return;
+
+        // Меняем элементы местами
+        [points[index], points[newIndex]] = [points[newIndex], points[index]];
+        renderPoints();
+    }
+
+    // Удаление точки
+    function deletePoint(index) {
+        points.splice(index, 1);
+        renderPoints();
+    }
 </script>
 </body>
 </html>
