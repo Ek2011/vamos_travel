@@ -2,15 +2,20 @@ import os
 import sqlite3
 import uuid
 
-from flask import Flask, render_template, redirect, request, abort, url_for
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from sqlalchemy import desc
+from flask import Flask, render_template
+from flask_login import LoginManager, login_user, login_required, logout_user
 from werkzeug.utils import secure_filename
-from flask import flash, redirect
 
 from forms.user import RegisterForm, LoginForm
 from data.users import User
+
+from flask import render_template, redirect, url_for
+from flask_login import login_required, current_user
 from data import db_session
+from data.trips import Trip
+from data.points import TripPoint
+from forms.step_1_form import StepOneForm
+
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -18,10 +23,6 @@ login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 UPLOAD_FOLDER = "static/uploads/"
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Подключаемся строго к папке db рядом с main.py
-db_session.global_init(os.path.join(BASE_DIR, "db", "trevel.db"))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -113,36 +114,7 @@ def index():
 @app.route('/step_1', methods=['GET', 'POST'])
 @login_required
 def step_1():
-    db_sess = db_session.create_session()
-    # Загружаем все точки из базы данных
-    points = db_sess.query(TripPoint).all()
-
-    # Передаем список points в HTML-шаблон
     return render_template('step_1.html', points=points)
-
-from flask import request, redirect, url_for
-from data import db_session
-from data.points import TripPoint
-
-
-@app.route('/add_point', methods=['POST'])
-def add_point():
-    # Получаем данные из полей HTML-формы
-    destination = request.form.get('point_name')
-    arrival_time = request.form.get('point_date')
-
-    # Открываем сессию и создаем запись
-    db_sess = db_session.create_session()
-    point = TripPoint(
-        destination=destination,
-        arrival_time=arrival_time,
-    )
-    db_sess.add(point)
-    db_sess.commit()
-    print("ФАЙЛ БАЗЫ:", db_sess.bind.url)
-    print("ЗАПИСИ В ТАБЛИЦЕ:", db_sess.query(TripPoint).all())
-
-    return redirect(url_for('step_1', open_modal=1))  # Возвращаем на страницу конструктора
 
 
 if __name__ == '__main__':
