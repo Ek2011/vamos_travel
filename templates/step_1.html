@@ -34,36 +34,69 @@
         </div>
 
         <!-- Список точек маршрута -->
-        <div class="d-flex align-items-center mt-3 p-2 bg-light rounded border">
-        <span class="badge bg-info text-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3"
-              style="width: 30px; height: 30px;">
-          1
-        </span>
-            <p class="mb-0 fs-5 me-auto">Точка, дата</p>
+        {% if points %}
+        {% for point in points %}
+        <div class="d-flex align-items-center mt-2 p-2 bg-light rounded border">
+            <!-- Номер точки в синем кружочке (1, 2, 3...) -->
+            <span class="badge bg-info text-dark rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                  style="width: 30px; height: 30px;">
+        {{ loop.index }}
+      </span>
 
-            <!-- Блок с кнопками -->
+            <!-- Название города и дата из базы данных -->
+            <p class="mb-0 fs-5 me-auto">
+                {{ point.destination }}, <span class="text-muted fs-6">{{ point.arrival_time }}</span>
+            </p>
+
+            <!-- Блок с кнопками управления -->
             <div class="d-flex gap-1">
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
-                        style="width: 32px; height: 32px;">▲
+                        style="width: 32px; height: 32px;" title="Вверх">▲
                 </button>
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
-                        style="width: 32px; height: 32px;">▼
+                        style="width: 32px; height: 32px;" title="Вниз">▼
                 </button>
                 <button type="button"
                         class="btn btn-outline-danger btn-sm p-0 d-flex align-items-center justify-content-center"
                         style="width: 32px; height: 32px;" title="Удалить">
-                    <i class="bi bi-x-lg fs-5" style="-webkit-text-stroke: 1.5px currentColor;"></i>
+                    <svg xmlns="http://w3.org" width="20" height="20" fill="currentColor" class="bi bi-x-lg"
+                         viewBox="0 0 16 16">
+                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                    </svg>
                 </button>
             </div>
         </div>
+        {% endfor %}
+        {% else %}
+        <!-- Сообщение, если точек в базе еще нет -->
+        <p class="text-muted mt-3">В маршруте пока нет ни одной точки. Нажмите «Добавить точку».</p>
+        {% endif %}
 
-        <!-- Кнопки действий -->
-        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-            <button type="button" class="btn btn-secondary">Отмена</button>
-            <button type="button" class="btn btn-primary">Сохранить изменения</button>
+        <!-- Блок с кнопками -->
+        <div class="d-flex gap-1">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
+                    style="width: 32px; height: 32px;">▲
+            </button>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm p-0 d-flex align-items-center justify-content-center fs-5"
+                    style="width: 32px; height: 32px;">▼
+            </button>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm p-0 d-flex align-items-center justify-content-center"
+                    style="width: 32px; height: 32px;" title="Удалить">
+                <i class="bi bi-x-lg fs-5" style="-webkit-text-stroke: 1.5px currentColor;"></i>
+            </button>
         </div>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <button type="button" class="btn btn-secondary">Отмена</button>
+        <button type="button" class="btn btn-primary">Сохранить изменения</button>
+    </div>
 
     </div>
 </header>
@@ -107,6 +140,15 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous">
+</script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('open_modal') === '1') {
+    const routeModal = new bootstrap.Modal(document.getElementById('routeModal'));
+    routeModal.show();
+    // Очищаем адресную строку, чтобы при обычном обновлении F5 окно не выскакивало снова
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 </script>
 </body>
 </html>

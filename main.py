@@ -113,7 +113,12 @@ def index():
 @app.route('/step_1', methods=['GET', 'POST'])
 @login_required
 def step_1():
-    return render_template('step_1.html')
+    db_sess = db_session.create_session()
+    # Загружаем все точки из базы данных
+    points = db_sess.query(TripPoint).all()
+
+    # Передаем список points в HTML-шаблон
+    return render_template('step_1.html', points=points)
 
 from flask import request, redirect, url_for
 from data import db_session
@@ -137,7 +142,7 @@ def add_point():
     print("ФАЙЛ БАЗЫ:", db_sess.bind.url)
     print("ЗАПИСИ В ТАБЛИЦЕ:", db_sess.query(TripPoint).all())
 
-    return redirect(url_for('step_1'))  # Возвращаем на страницу конструктора
+    return redirect(url_for('step_1', open_modal=1))  # Возвращаем на страницу конструктора
 
 
 if __name__ == '__main__':
