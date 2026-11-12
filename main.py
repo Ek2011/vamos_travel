@@ -14,7 +14,7 @@ from flask_login import login_required, current_user
 from data import db_session
 from data.trips import Trip
 from data.points import TripPoint
-from forms.step_1_form import StepOneForm
+from forms.step_1_form import StepFirstForm
 
 
 app = Flask(__name__)
