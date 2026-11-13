@@ -11,16 +11,19 @@
 </head>
 <body>
 
-<!-- Главная форма StepOneForm -->
-<form id="stepOneForm" action="" method="POST">
+<!-- Главная форма StepFirstForm -->
+<form id="StepFirstForm" action="" method="POST">
     {{ form.hidden_tag() }}
 
     <div class="container-lg p-4">
         <!-- Шапка -->
         <div class="d-flex align-items-center justify-content-between mb-4">
-            <h5 class="mb-0">Создание маршрута</h5>
-            <!-- Крестик открывает модальное окно выхода -->
-            <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#exitModal" aria-label="Выйти"></button>
+            <h2 class="mb-0">Создание маршрута</h2>
+            <!--кнопки действий -->
+            <div class="d-flex gap-2 pt-3">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exitModal">Выйти</button>
+                {{ form.next_step(class="btn btn-primary", disabled=True) }}
+            </div>
         </div>
 
         <!-- Поле ввода названия маршрута -->
@@ -40,12 +43,6 @@
         <!-- Контейнер, куда JavaScript будет рисовать добавленные точки -->
         <div id="pointsContainer">
             <p id="emptyMessage" class="text-muted mt-3">В маршруте пока нет ни одной точки. Нажмите «Добавить точку».</p>
-        </div>
-
-        <!-- Нижние кнопки действий -->
-        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exitModal">Выйти</button>
-            {{ form.next_step(class="btn btn-primary") }}
         </div>
     </div>
 

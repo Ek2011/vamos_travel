@@ -1,22 +1,21 @@
 import json
 import os
 import sqlite3
-import uuid
 
-from flask import Flask, render_template
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask import Flask
+from flask_login import LoginManager, login_user, logout_user
 from werkzeug.utils import secure_filename
 
 from forms.user import RegisterForm, LoginForm
 from data.users import User
 
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for
 from flask_login import login_required, current_user
 from data import db_session
 from data.trips import Trip
 from data.points import TripPoint
 from forms.step_1_form import StepFirstForm
-
+from flask import request
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -144,12 +143,13 @@ def step_1():
         db_sess.commit()
 
         # 3. Проверяем, какая кнопка была нажата
-        if form.next_step.data:
-            return redirect(url_for('index'))
-        elif form.exit_step.data:
+        #if form.next_step.data:
+        #    return redirect(url_for('index'))
+        if form.exit_step.data:
             return redirect(url_for('index'))
 
     return render_template('step_1.html', form=form)
+
 
 
 if __name__ == '__main__':

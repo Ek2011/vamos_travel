@@ -7,4 +7,4 @@ class StepFirstForm(FlaskForm):
     title = StringField('Название маршрута', validators=[DataRequired()])
     points_data = HiddenField('Список точек')
     next_step = SubmitField('Продолжить')
-    exit_step = SubmitField('Выйти')
+    exit_step = SubmitField('Сохранить')
