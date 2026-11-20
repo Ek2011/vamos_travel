@@ -8,6 +8,7 @@
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
           crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=80db05c0-f02b-47b3-86d9-b7ab4a33a896&lang=ru_RU" type="text/javascript"></script>
 </head>
 <body>
 
@@ -44,6 +45,12 @@
         <div id="pointsContainer">
             <p id="emptyMessage" class="text-muted mt-3">В маршруте пока нет ни одной точки. Нажмите «Добавить точку».</p>
         </div>
+
+        <!-- Карта маршрута -->
+        <div class="mt-4">
+            <p class="mb-0 fs-4 fw-medium">Карта маршрута</p>
+            <div id="map" class="rounded border mt-2" style="width: 100%; height: 450px;"></div>
+        </div>
     </div>
 
     <!-- Модальное окно при выходе (внутри формы, чтобы работала кнопка «Сохранить») -->
@@ -77,15 +84,18 @@
 
             <form id="addPointLocalForm">
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label for="pointName" class="form-label">Название точки / Город</label>
+                    <div class="mb-3 position-relative">
+                        <label for="pointName" class="form-label">Город</label>
                         <input type="text" class="form-control" id="pointName"
-                               placeholder="Например: Москва, Красная площадь" required>
+                               placeholder="Например: Москва" required autocomplete="off">
+                        <ul id="suggestList" class="list-group position-absolute w-100 shadow"
+                            style="z-index: 1055; display: none; max-height: 220px; overflow-y: auto;"></ul>
                     </div>
                     <div class="mb-3">
                         <label for="pointDate" class="form-label">Дата посещения</label>
                         <input type="date" class="form-control" id="pointDate" required>
                     </div>
+                    <div id="pointError" class="text-danger small mt-2" style="display: none;"></div>
                 </div>
 
                 <div class="modal-footer">
@@ -112,6 +122,9 @@
 
     // Функция перерисовки списка на экране и обновления скрытого поля
     function renderPoints() {
+        // Обновляем карту
+        updateMap();
+
         // Упаковываем актуальный список в JSON для отправки в Python
         hiddenInput.value = JSON.stringify(points);
 
@@ -151,20 +164,32 @@
     }
 
     // Добавление новой точки из модального окна
-    addPointLocalForm.addEventListener('submit', function (e) {
+    addPointLocalForm.addEventListener('submit', async function (e) {
         e.preventDefault(); // Отменяем перезагрузку страницы
 
         const nameInput = document.getElementById('pointName');
         const dateInput = document.getElementById('pointDate');
 
+        const cityName = nameInput.value.trim();
+        if (!cityName) return;
+
+        // Ищем город через Яндекс Геокодер (принимаем только города)
+        const result = await geocodeCity(cityName);
+        if (!result) {
+            showPointError('Укажите город России. Сёла, улицы, площади и другие объекты не подходят.');
+            return;
+        }
+
         points.push({
-            destination: nameInput.value.trim(),
-            arrival_time: dateInput.value
+            destination: result.name,
+            arrival_time: dateInput.value,
+            coords: result.coords
         });
 
         renderPoints();
 
         // Очищаем поля и закрываем модальное окно
+        hidePointError();
         addPointLocalForm.reset();
         const modalInstance = bootstrap.Modal.getInstance(addPointModalEl);
         modalInstance.hide();
@@ -184,6 +209,213 @@
     function deletePoint(index) {
         points.splice(index, 1);
         renderPoints();
+    }
+</script>
+
+<script>
+    // ==== Карта и геокодирование городов ====
+    const GEOCODER_API_KEY = '8639f4a8-11e3-4ce3-93d3-64dc6188b462';
+    const SUGGEST_API_KEY = '2b37e1a5-3fd7-42fe-bcb5-846d6d1f7f0f';
+
+    // Первые слова, с которых начинаются НЕ-города («село …», «деревня …», «СНТ …» и т.д.)
+    const NON_CITY_FIRST_WORDS = [
+        'село', 'деревня', 'посёлок', 'поселок', 'хутор', 'аул', 'станица', 'слобода',
+        'рабочий', 'дачный', 'курортный', 'коттеджный', 'жилой',
+        'садоводческое', 'садовое', 'дачное', 'огородническое',
+        'пгт', 'снт', 'сдт', 'днп', 'днт', 'тсн', 'гск', 'кп', 'жк', 'ст', 'мкр',
+        'выселок', 'выселки', 'починок', 'разъезд', 'кордон', 'заимка', 'улус',
+        'кишлак', 'аал', 'станция', 'полустанок', 'микрорайон', 'территория'
+    ];
+
+    // Слова, которых в названиях городов не бывает вообще
+    const NON_CITY_ANYWHERE_WORDS = [
+        'товарищество', 'партнёрство', 'партнерство', 'кооператив'
+    ];
+
+    // Является ли название городом (а не селом/деревней/СНТ/посёлком и т.п.)
+    function isCityName(localityName) {
+        if (!localityName) return false;
+        const lower = localityName.trim().toLowerCase();
+        const words = lower.split(/\s+/);
+
+        // 1. Начинается с типа поселения?
+        if (NON_CITY_FIRST_WORDS.indexOf(words[0]) !== -1) {
+            return false;
+        }
+
+        // 2. Содержит слова, которых не бывает в названиях городов?
+        for (let i = 0; i < words.length; i++) {
+            const w = words[i].replace(/[«»"'.,()]/g, '');
+            if (NON_CITY_ANYWHERE_WORDS.indexOf(w) !== -1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    let map = null;
+    let routePolyline = null;
+    let routePlacemarks = [];
+
+    const suggestList = document.getElementById('suggestList');
+    const pointNameInput = document.getElementById('pointName');
+    const pointError = document.getElementById('pointError');
+    let suggestTimer = null;
+
+    // Инициализация карты после загрузки API
+    ymaps.ready(function () {
+        map = new ymaps.Map('map', {
+            center: [55.751574, 37.573856],
+            zoom: 4,
+            controls: ['zoomControl', 'typeSelector']
+        });
+    });
+
+    // Геокодирование города -> {coords, name}, либо null, если город не найден
+    async function geocodeCity(cityName) {
+        const url = 'https://geocode-maps.yandex.ru/1.x/?apikey=' + GEOCODER_API_KEY +
+                    '&geocode=' + encodeURIComponent(cityName) +
+                    '&format=json&kind=locality&results=1&lang=ru_RU';
+        const resp = await fetch(url);
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        const members = data.response.GeoObjectCollection.featureMember;
+        if (!members || members.length === 0) return null;
+
+        const geoObject = members[0].GeoObject;
+        const meta = geoObject.metaDataProperty.GeocoderMetaData;
+
+        // Принимаем только населённые пункты (не улицы/дома/районы)
+        if (meta.kind !== 'locality') {
+            return null;
+        }
+
+        const components = meta.Address.Components;
+
+        // Принимаем только города России
+        const country = components.find(function (c) { return c.kind === 'country'; });
+        if (!country || country.name.toLowerCase() !== 'россия') {
+            return null;
+        }
+
+        const locality = components.find(function (c) { return c.kind === 'locality'; });
+
+        // Принимаем только города (не сёла/деревни/посёлки)
+        if (!isCityName(locality ? locality.name : '')) {
+            return null;
+        }
+
+        const pos = geoObject.Point.pos; // "lon lat"
+        const parts = pos.split(' ');
+        return {
+            coords: [parseFloat(parts[1]), parseFloat(parts[0])],
+            name: locality.name
+        };
+    }
+
+    function showPointError(msg) {
+        pointError.textContent = msg;
+        pointError.style.display = 'block';
+    }
+
+    function hidePointError() {
+        pointError.textContent = '';
+        pointError.style.display = 'none';
+    }
+
+    function hideSuggest() {
+        suggestList.style.display = 'none';
+        suggestList.innerHTML = '';
+    }
+
+    // Подсказки городов (Suggest, только locality)
+    async function fetchSuggest(query) {
+        try {
+            const url = 'https://suggest-maps.yandex.ru/v1/suggest?apikey=' + SUGGEST_API_KEY +
+                        '&text=' + encodeURIComponent(query) +
+                        '&lang=ru_RU&types=locality&print_address=0&countries=ru';
+            const resp = await fetch(url);
+            const data = await resp.json();
+            const results = (data.results || []).filter(function (r) {
+                const title = r.title && r.title.text ? r.title.text : '';
+                return (r.tags || []).indexOf('locality') !== -1 && isCityName(title);
+            });
+            renderSuggest(results);
+        } catch (err) {
+            hideSuggest();
+        }
+    }
+
+    function renderSuggest(results) {
+        hideSuggest();
+        if (results.length === 0) return;
+        results.forEach(function (r) {
+            const li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action';
+            li.style.cursor = 'pointer';
+            li.textContent = r.title.text;
+            li.addEventListener('mousedown', function (ev) {
+                ev.preventDefault();
+                pointNameInput.value = r.title.text;
+                hideSuggest();
+                hidePointError();
+            });
+            suggestList.appendChild(li);
+        });
+        suggestList.style.display = 'block';
+    }
+
+    pointNameInput.addEventListener('input', function () {
+        hidePointError();
+        clearTimeout(suggestTimer);
+        const q = this.value.trim();
+        if (q.length < 2) { hideSuggest(); return; }
+        suggestTimer = setTimeout(function () { fetchSuggest(q); }, 300);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!suggestList.contains(e.target) && e.target !== pointNameInput) {
+            hideSuggest();
+        }
+    });
+
+    // Отрисовка меток и линии маршрута на карте
+    function updateMap() {
+        if (!map) return;
+
+        routePlacemarks.forEach(function (m) { map.geoObjects.remove(m); });
+        routePlacemarks = [];
+        if (routePolyline) { map.geoObjects.remove(routePolyline); routePolyline = null; }
+
+        const coords = [];
+        points.forEach(function (point, index) {
+            if (!point.coords) return;
+            coords.push(point.coords);
+            const marker = new ymaps.Placemark(point.coords, {
+                balloonContent: (index + 1) + '. ' + point.destination
+            }, {
+                preset: 'islands#blueCircleDotIcon'
+            });
+            map.geoObjects.add(marker);
+            routePlacemarks.push(marker);
+        });
+
+        if (coords.length >= 2) {
+            routePolyline = new ymaps.Polyline(coords, {}, {
+                strokeColor: '#9775fa',
+                strokeWidth: 4,
+                strokeOpacity: 0.9
+            });
+            map.geoObjects.add(routePolyline);
+        }
+
+        if (coords.length > 0) {
+            map.setBounds(ymaps.util.bounds.fromPoints(coords), {
+                checkZoomRange: true,
+                zoomMargin: 30
+            });
+        }
     }
 </script>
 </body>
