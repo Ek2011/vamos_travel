@@ -113,7 +113,7 @@
 
 <script>
     // Список всех точек в памяти браузера
-    let points = [];
+    let points = JSON.parse(document.getElementById('points_data').value || '[]');
 
     const pointsContainer = document.getElementById('pointsContainer');
     const hiddenInput = document.getElementById('points_data');
@@ -264,12 +264,22 @@
     let suggestTimer = null;
 
     // Инициализация карты после загрузки API
-    ymaps.ready(function () {
+    ymaps.ready(async function () {
         map = new ymaps.Map('map', {
             center: [55.751574, 37.573856],
             zoom: 4,
             controls: ['zoomControl', 'typeSelector']
         });
+
+        // Если у точек из БД нет координат — находим их по названию города
+        for (let p of points) {
+            if (!p.coords) {
+                const res = await geocodeCity(p.destination);
+                if (res) p.coords = res.coords;
+            }
+        }
+
+        renderPoints();
     });
 
     // Геокодирование города -> {coords, name}, либо null, если город не найден

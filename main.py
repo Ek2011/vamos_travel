@@ -3,7 +3,7 @@ import os
 import sqlite3
 from sqlalchemy import desc
 
-from flask import Flask
+from flask import Flask, abort
 from flask_login import LoginManager, login_user, logout_user
 from werkzeug.utils import secure_filename
 
@@ -156,6 +156,51 @@ def step_1():
 
     return render_template('step_1.html', form=form)
 
+
+@app.route('/step_1_edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_news(id):
+    form = StepFirstForm()
+    db_sess = db_session.create_session()
+    trips = db_sess.query(Trip).filter(Trip.id == id, Trip.user_id == current_user.id).first()
+    if not trips:
+        abort(404)
+
+    if request.method == "GET":
+        form.title.data = trips.title
+        db_points = db_sess.query(TripPoint).filter(TripPoint.trip_id == trips.id).order_by(
+            TripPoint.sequence_order).all()
+        points_list = [
+            {
+                "destination": p.destination,
+                "arrival_time": str(p.arrival_time)
+            }
+            for p in db_points
+        ]
+        form.points_data.data = json.dumps(points_list, ensure_ascii=False)
+
+    if form.validate_on_submit():
+        trips.title = form.title.data
+
+        # Удаляем старые точки этой поездки и записываем обновленный список (как в step_1)
+        db_sess.query(TripPoint).filter(TripPoint.trip_id == trips.id).delete()
+        raw_points = form.points_data.data
+        if raw_points:
+            points_list = json.loads(raw_points)
+            for index, item in enumerate(points_list):
+                point = TripPoint(
+                    trip_id=trips.id,
+                    sequence_order=index + 1,
+                    destination=item['destination'],
+                    arrival_time=item['arrival_time']
+                )
+                db_sess.add(point)
+
+        db_sess.commit()
+        if form.exit_step.data:
+            return redirect(url_for('index'))
+
+    return render_template('step_1.html', title='Продолжение', form=form)
 
 
 if __name__ == '__main__':
