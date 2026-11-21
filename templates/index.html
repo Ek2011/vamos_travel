@@ -11,59 +11,25 @@
 
     <div id="tripsCarousel" class="carousel slide" data-bs-ride="false">
         <div class="carousel-inner">
-            <div class="carousel-item active">
+            {% for group in trips | batch(3) %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}">
                 <div class="row g-4">
+                    {% for trip in group %}
                     <div class="col-md-4 col-sm-6">
                         <div class="card h-100">
                             <div class="card-body d-flex flex-column justify-content-between">
                                 <div>
-                                    <h5 class="card-title fw-bold fs-5">Поездка в Сочи</h5>
-                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
+                                    <h5 class="card-title fw-bold fs-5">{{ trip.title }}</h5>
+                                    <p class="card-text text-muted small">{{ trip.description }}</p>
                                 </div>
-                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
+                                <a href="/trip/{{ trip.id }}" class="btn btn-primary mt-3 w-100">Продолжить</a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card h-100">
-                            <div class="card-body d-flex flex-column justify-content-between">
-                                <div>
-                                    <h5 class="card-title fw-bold fs-5">Выходные в Туле</h5>
-                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
-                                </div>
-                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 d-none d-md-block">
-                        <div class="card h-100">
-                            <div class="card-body d-flex flex-column justify-content-between">
-                                <div>
-                                    <h5 class="card-title fw-bold fs-5">Тур на Алтай</h5>
-                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
-                                </div>
-                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            <div class="carousel-item">
-                <div class="row g-4">
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card h-100">
-                            <div class="card-body d-flex flex-column justify-content-between">
-                                <div>
-                                    <h5 class="card-title fw-bold fs-5">Поездка в Казань</h5>
-                                    <p class="card-text text-muted small">С вспомогательным текстом ниже в качестве перехода к контенту.</p>
-                                </div>
-                                <a href="#" class="btn btn-primary mt-3 w-100">Продолжить</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            {% endfor %}
         </div>
 
         <button class="carousel-control-prev" type="button" data-bs-target="#tripsCarousel" data-bs-slide="prev" style="width: 5%; filter: invert(1);">

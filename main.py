@@ -1,6 +1,7 @@
 import json
 import os
 import sqlite3
+from sqlalchemy import desc
 
 from flask import Flask
 from flask_login import LoginManager, login_user, logout_user
@@ -50,13 +51,14 @@ def index():
     login_form = LoginForm()
     register_form = RegisterForm()
 
+    db_sess = db_session.create_session()
+
     message = ""
     show_modal = None
 
     # --- ОБРАБОТКА ВХОДА (LOGIN) ---
     if 'submit_login' in request.form:
         if login_form.validate_on_submit():
-            db_sess = db_session.create_session()
             user = db_sess.query(User).filter(User.email == login_form.email.data).first()
             if user and user.check_password(login_form.password.data):
                 login_user(user, remember=login_form.remember_me.data)
@@ -75,7 +77,6 @@ def index():
                 message = "Пароли не совпадают"
                 show_modal = "registerModal"
             else:
-                db_sess = db_session.create_session()
                 # Проверка уникальности Email
                 if db_sess.query(User).filter(User.email == register_form.email.data).first():
                     message = "Такой пользователь уже есть"
@@ -102,13 +103,18 @@ def index():
         else:
             show_modal = "registerModal"
 
+    trips = None
+    if current_user.is_authenticated:
+        trips = db_sess.query(Trip).filter(current_user.id == Trip.user_id).all()
+
     # Рендерим главную страницу и передаем туда обе формы и метки ошибок
     return render_template('index.html',
                            login_form=login_form,
                            register_form=register_form,
                            message=message,
                            Icon='static/icon',
-                           show_modal=show_modal)
+                           show_modal=show_modal,
+                           trips=trips)
 
 
 @app.route('/step_1', methods=['GET', 'POST'])
